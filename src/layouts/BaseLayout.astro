@@ -1,0 +1,30 @@
+---
+import '../styles/global.css';
+const { title } = Astro.props;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{title} | Robotics Engineer</title>
+  </head>
+  <body class="bg-slate-50 text-slate-900 selection:bg-blue-100">
+    <nav class="sticky top-0 z-40 w-full backdrop-blur-md bg-white/75 border-b border-slate-200">
+      <div class="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+        <a href="/" class="font-bold text-xl tracking-tighter hover:text-blue-600 transition-colors">
+          ADRIAN SHKUMBOV
+        </a>
+        <div class="flex gap-8 text-[10px] font-bold tracking-[0.2em] text-slate-500 uppercase">
+          <a href="/" class="hover:text-blue-600 transition-colors">Home</a>
+          <a href="/projects" class="hover:text-blue-600 transition-colors">Projects</a>
+          <a href="/experience" class="hover:text-blue-600 transition-colors">Experience</a>
+        </div>
+      </div>
+    </nav>
+    <slot />
+    <footer class="py-12 border-t border-slate-200 mt-20 text-center text-slate-500 text-sm">
+      <p>&copy; 2026 Built with Astro & Tailwind</p>
+    </footer>
+  </body>
+</html>

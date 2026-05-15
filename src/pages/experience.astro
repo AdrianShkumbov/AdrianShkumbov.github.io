@@ -1,0 +1,55 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Experience">
+  <main class="max-w-4xl mx-auto px-6 py-16">
+    <header class="mb-16 border-b border-slate-200 pb-8">
+      <h1 class="text-5xl font-black text-slate-900 mb-4 tracking-tighter italic">TECHNICAL_EXPERIENCE</h1>
+      <p class="text-slate-500 font-mono text-sm uppercase tracking-widest">Hardware / Software / Integration</p>
+    </header>
+
+    <div class="space-y-12">
+      <section class="relative pl-8 border-l-2 border-slate-100">
+        <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-blue-600 border-4 border-white shadow-sm"></div>
+        <div class="flex justify-between items-baseline mb-2">
+          <h2 class="text-2xl font-bold text-slate-900">Robotics Research Intern</h2>
+          <span class="font-mono text-xs text-blue-600 font-bold bg-blue-50 px-2 py-1 rounded">2025 - PRESENT</span>
+        </div>
+        <p class="text-sm font-bold text-slate-500 uppercase tracking-tight mb-4">University Robotics Lab</p>
+        <ul class="prose-engineering space-y-2 text-slate-600">
+          <li>Integrated **ROS2** nodes for autonomous navigation on a differential drive platform.</li>
+          <li>Optimized **PID control loops** for motor velocity tracking, reducing steady-state error by 15%.</li>
+          <li>Authored technical documentation for prototype maintenance and sensor calibration[cite: 33].</li>
+        </ul>
+      </section>
+
+      <section class="pt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="p-6 bg-white border border-slate-200 rounded-xl">
+          <h3 class="text-xs font-black text-blue-600 uppercase tracking-widest mb-4">Mechanical_CAD</h3>
+          <ul class="font-mono text-[11px] text-slate-500 space-y-1">
+            <li>SOLIDWORKS</li>
+            <li>Mechanism Design</li>
+            <li>3D Printing (SLA/FDM)</li>
+          </ul>
+        </div>
+        <div class="p-6 bg-white border border-slate-200 rounded-xl">
+          <h3 class="text-xs font-black text-blue-600 uppercase tracking-widest mb-4">Systems_Control</h3>
+          <ul class="font-mono text-[11px] text-slate-500 space-y-1">
+            <li>C++ / Python</li>
+            <li>MATLAB / Simulink</li>
+            <li>PID / Kalman Filters</li>
+          </ul>
+        </div>
+        <div class="p-6 bg-white border border-slate-200 rounded-xl">
+          <h3 class="text-xs font-black text-blue-600 uppercase tracking-widest mb-4">Development_Tools</h3>
+          <ul class="font-mono text-[11px] text-slate-500 space-y-1">
+            <li>Ubuntu 22.04 / Git </li>
+            <li>Astro / Tailwind [cite: 9, 12]</li>
+            <li>CI/CD Pipelines</li>
+          </ul>
+        </div>
+      </section>
+    </div>
+  </main>
+</BaseLayout>

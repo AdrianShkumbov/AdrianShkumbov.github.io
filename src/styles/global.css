@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+/* This is the magic v4 directive for plugins */
+@plugin "@tailwindcss/typography";
+
+@theme {
+  --color-brand: #3b82f6;
+}
+
+@utility prose-engineering {
+  /* We use @reference to ensure Tailwind knows about the prose classes 
+     imported by the plugin above */
+  @apply prose prose-slate max-w-none 
+    prose-headings:tracking-tight prose-headings:font-bold
+    prose-code:text-blue-600 prose-code:bg-slate-100 prose-code:px-1 prose-code:rounded
+    prose-strong:text-slate-900;
+}
