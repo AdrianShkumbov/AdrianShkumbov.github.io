@@ -1,30 +1,31 @@
 import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, useGLTF, Center, Environment, ContactShadows } from '@react-three/drei';
+import { OrbitControls, useGLTF, Environment, ContactShadows, Bounds } from '@react-three/drei';
 
 function Model({ url }) {
+  // Safety check: wait until URL is ready
+  if (!url) return null;
   const { scene } = useGLTF(url);
-  // Using primitive is the standard for rendering loaded GLTF scenes
   return <primitive object={scene} />;
 }
 
 export default function CadViewer({ modelPath }) {
   return (
-    <div className="w-full h-96 bg-gray-100 rounded-xl border border-gray-300 shadow-inner overflow-hidden my-8 relative">
-      {/* We set shadows to true and use a modern FOV. 
-         Ambient and Point lights provide explicit illumination 
-         without relying on deprecated auto-lighting helpers.
-      */}
-      <Canvas shadows camera={{ position: [5, 5, 5], fov: 50 }}>
-        <ambientLight intensity={0.7} />
-        <pointLight position={[10, 10, 10]} intensity={1.5} castShadow />
+    //<div className="w-full h-96 bg-slate-200 rounded-xl border-2 border-slate-400 shadow-inner overflow-hidden my-8 relative">
+    <div className="w-full h-96 bg-slate-200 rounded-xl border-2 border-slate-300 shadow-inner overflow-hidden my-8 relative">
+      <Canvas shadows camera={{ position: [5, -2.5, -5], fov: 50 }}>
+        <ambientLight intensity={0.3} />
+        
+        {/* FIXED: The point light position is now correctly formatted as an array */}
+        <pointLight position={[10, 10, 10]} intensity={0.8} castShadow />
         
         <Suspense fallback={null}>
-          <Center>
+          {/* Bounds recalculates when the model mounts/changes */}
+          <Bounds fit clip observe margin={1.2}>
             <Model url={modelPath} />
-          </Center>
-          {/* Environment provides high-quality reflections for mechanical materials */}
-          <Environment preset="city" />
+          </Bounds>
+          
+          <Environment preset="night" />
           <ContactShadows 
             position={[0, -0.5, 0]} 
             opacity={0.4} 
