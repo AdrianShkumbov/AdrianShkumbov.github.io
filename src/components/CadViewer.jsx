@@ -9,15 +9,24 @@ function Model({ url }) {
   return <primitive object={scene} />;
 }
 
-export default function CadViewer({ modelPath }) {
+// Added configurable props with your specific default values
+export default function CadViewer({ 
+  modelPath,
+  cameraPos = [5, -2.5, -5],
+  lightPos = [10, 10, 10],
+  lightIntensity = 0.8,
+  ambientIntensity = 0.3,
+  envPreset = "night",
+  containerHeight = "h-96",
+  containerMargin = "my-8"
+}) {
   return (
-    //<div className="w-full h-96 bg-slate-200 rounded-xl border-2 border-slate-400 shadow-inner overflow-hidden my-8 relative">
-    <div className="w-full h-96 bg-slate-200 rounded-xl border-2 border-slate-300 shadow-inner overflow-hidden my-8 relative">
-      <Canvas shadows camera={{ position: [5, -2.5, -5], fov: 50 }}>
-        <ambientLight intensity={0.3} />
+    <div className={`w-full ${containerHeight} ${containerMargin} bg-slate-200 rounded-xl border-2 border-slate-300 shadow-inner overflow-hidden relative`}>
+      <Canvas shadows camera={{ position: cameraPos, fov: 50 }}>
         
-        {/* FIXED: The point light position is now correctly formatted as an array */}
-        <pointLight position={[10, 10, 10]} intensity={0.8} castShadow />
+        {/* Injected the lighting variables */}
+        <ambientLight intensity={ambientIntensity} />
+        <pointLight position={lightPos} intensity={lightIntensity} castShadow />
         
         <Suspense fallback={null}>
           {/* Bounds recalculates when the model mounts/changes */}
@@ -25,7 +34,8 @@ export default function CadViewer({ modelPath }) {
             <Model url={modelPath} />
           </Bounds>
           
-          <Environment preset="night" />
+          {/* Injected the environment variable */}
+          <Environment preset={envPreset} />
           <ContactShadows 
             position={[0, -0.5, 0]} 
             opacity={0.4} 
