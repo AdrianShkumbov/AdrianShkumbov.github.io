@@ -8,10 +8,19 @@
 }
 
 @utility prose-engineering {
-  /* We use @reference to ensure Tailwind knows about the prose classes 
-     imported by the plugin above */
   @apply prose prose-slate max-w-none 
     prose-headings:tracking-tight prose-headings:font-bold
     prose-code:text-blue-600 prose-code:bg-slate-100 prose-code:px-1 prose-code:rounded
     prose-strong:text-slate-900;
+}
+
+/* Add some breathing room when clicking sidebar links */
+.prose-engineering h2,
+.prose-engineering h3 {
+  scroll-margin-top: 120px; 
+}
+
+/* Make the jump a smooth scroll instead of an instant snap */
+html {
+  scroll-behavior: smooth;
 }

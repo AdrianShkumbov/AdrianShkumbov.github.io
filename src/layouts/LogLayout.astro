@@ -1,42 +1,18 @@
 ---
 import BaseLayout from './BaseLayout.astro';
-const { frontmatter } = Astro.props;
 
-// Mock navigation items - in a real scenario, you can extract these from MDX headers
-const sections = [
-  { id: 'overview', label: 'OVERVIEW' },
-  { id: 'hardware', label: 'HARDWARE_DESIGN' },
-  { id: 'software', label: 'SOFTWARE DESIGN' },
-  { id: 'integration', label: 'INTEGRATION' },
-  {id: 'takeaways', label: 'TAKE-AWAYS'},
-];
+const { frontmatter } = Astro.props;
 ---
 
 <BaseLayout title={frontmatter.title}>
   <div class="max-w-6xl mx-auto px-6 py-12 flex flex-col md:flex-row gap-12">
     
     <aside class="md:w-64 flex-shrink-0">
-      <div class="sticky top-24 space-y-8">
+      <div class="sticky top-36 space-y-8">
         <div>
-          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Project_Modules</h3>
-          <ul class="space-y-3 border-l border-slate-200 ml-1">
-            {sections.map(section => (
-              <li>
-                <a href={`#${section.id}`} class="block pl-4 -ml-px border-l-2 border-transparent hover:border-blue-500 text-slate-500 hover:text-blue-600 text-sm font-medium transition-all uppercase tracking-tighter">
-                  {section.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div class="p-4 bg-slate-100 rounded-lg border border-slate-200">
-          <h4 class="text-[10px] font-bold text-slate-500 uppercase mb-2">Technical_Specs</h4>
-          <ul class="text-[11px] font-mono text-slate-600 space-y-1">
-            <li>OS: Ubuntu 22.04</li>
-            <li>Tools: SOLIDWORKS</li>
-            <li>Logic: C++, PID</li>
-          </ul>
+          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Chapters</h3>
+          <ul id="dynamic-sidebar" class="space-y-3 border-l border-slate-200 ml-1">
+             </ul>
         </div>
       </div>
     </aside>
@@ -64,3 +40,43 @@ const sections = [
     </main>
   </div>
 </BaseLayout>
+
+<script>
+  function generateSidebar() {
+    // Find all h2 tags inside the main content area and convert them to an array
+    const allHeadings = Array.from(document.querySelectorAll('.prose-engineering h2'));
+    
+    // Filter out any headings that sit inside the .not-prose container (TLDR bubble, etc.)
+    const headings = allHeadings.filter(h2 => !h2.closest('.not-prose'));
+    
+    const sidebar = document.getElementById('dynamic-sidebar');
+
+    if (!sidebar) return;
+
+    // Clear it out
+    sidebar.innerHTML = '';
+
+    headings.forEach((h2) => {
+      // Auto-generate an ID if one doesn't exist
+      if (!h2.id) {
+        h2.id = h2.textContent.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      }
+
+      // Create the list item and link
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <a 
+          href="#${h2.id}" 
+          class="block pl-4 -ml-px border-l-2 border-transparent hover:border-blue-500 text-slate-500 hover:text-blue-600 text-sm font-medium transition-all uppercase tracking-tighter"
+        >
+          ${h2.textContent}
+        </a>
+      `;
+      
+      sidebar.appendChild(li);
+    });
+  }
+
+  // Run the function when the page loads
+  document.addEventListener('DOMContentLoaded', generateSidebar);
+</script>

@@ -1,18 +1,19 @@
 ---
 import { getCollection, render } from 'astro:content';
+import LogLayout from '../../layouts/LogLayout.astro';
 
 export async function getStaticPaths() {
   const logEntries = await getCollection('logs');
   return logEntries.map(entry => ({
-    // The new API uses 'id' instead of 'slug'
     params: { slug: entry.id }, 
     props: { entry },
   }));
 }
 
 const { entry } = Astro.props;
-// The new API uses a standalone render function
-const { Content } = await render(entry);
+const { Content, headings } = await render(entry);
 ---
 
-<Content />
+<LogLayout frontmatter={entry.data} headings={headings}>
+  <Content />
+</LogLayout>
