@@ -3,30 +3,63 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout title="Home">
-  <main class="max-w-4xl mx-auto px-6 py-20">
+  <main class="max-w-5xl mx-auto px-6 py-20">
     <section class="mb-24">
-      <h2 class="text-xs font-bold text-blue-600 uppercase tracking-[0.2em] mb-4">System_Status: Active</h2>
+      <h2 class="text-xs font-bold text-blue-600 uppercase tracking-[0.2em] mb-4">Status: Welcome</h2>
       <h1 class="text-6xl font-black text-slate-900 mb-8 tracking-tighter italic">
-        ROBOTICS_ENGINEER
+        HEY!
       </h1>
       <div class="prose-engineering text-lg text-slate-600 leading-relaxed">
         <p>
-          I am an engineer specializing in <strong>robotics and system integration</strong>[cite: 4]. 
-          My work focuses on bridging the gap between mechanical design and control theory to create 
-          machines that perform like well-oiled systems[cite: 4, 5].
+          I'm Adrian. I'm a recent robotics engineering graduate ...
         </p>
-        <p>
-          Currently, I am focused on multidisciplinary engineering challenges—ranging from 
-          <strong>CAD design in SOLIDWORKS</strong> to implementing <strong>PID control loops</strong> 
-          and <strong>Kalman filters</strong> for autonomous systems[cite: 5, 30, 32].
-        </p>
+
       </div>
     </section>
 
-    <section class="p-8 bg-slate-900 rounded-2xl text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
+    <section class="mb-24">
+      <h2 class="text-xs font-bold text-blue-600 uppercase tracking-[0.2em] mb-4">Skills</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="p-6 bg-white border border-slate-200 rounded-xl">
+          <h3 class="text-xs font-black text-cyan-600 uppercase tracking-widest mb-4">Software</h3>
+          <ul class="font-mono text-[11px] text-slate-500 space-y-1">
+            <li>Python (NumPy, OpenCV, PyTorch)</li>
+            <li>C // C++</li>
+            <li>ROS 2</li>
+            <li>MATLAB // Simulink</li>
+            <li>Linux</li>
+            <li>Git // CI/CD</li>
+          </ul>
+        </div>
+        
+        <div class="p-6 bg-white border border-slate-200 rounded-xl">
+          <h3 class="text-xs font-black text-cyan-600 uppercase tracking-widest mb-4">Electrical / Embedded</h3>
+          <ul class="font-mono text-[11px] text-slate-500 space-y-1">
+            <li>Embedded Linux (Nvidia Jetson, RPI)</li>
+            <li>Microcontrollers (ESP32, STM32, Arduino)</li>
+            <li>PCB Design (KiCAD, EaglePCB)</li>
+            <li>Oscilloscopes // Function Generators</li>
+            <li>Soldering & Wire Harnessing</li>
+          </ul>
+        </div>
+        
+        <div class="p-6 bg-white border border-slate-200 rounded-xl">
+          <h3 class="text-xs font-black text-cyan-600 uppercase tracking-widest mb-4">Mechanical</h3>
+          <ul class="font-mono text-[11px] text-slate-500 space-y-1">
+            <li>SOLIDWORKS // Fusion360 // AutoCAD</li>
+            <li>3D Printing (FDM/SLA)</li>
+            <li>Laser Cutting</li>
+            <li>Basic Machining</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="mb-24 p-8 bg-slate-900 rounded-2xl text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
       <div>
-        <h3 class="text-2xl font-bold mb-2 tracking-tight">Technical_Credentials.pdf</h3>
-        <p class="text-slate-400 font-mono text-sm">Size: 1.2MB | Format: LaTeX PDF</p>
+        <h3 class="text-2xl font-bold mb-2 tracking-tight">Resume_Adrian_Shkumbov.pdf</h3>
+        <p class="text-slate-400 font-mono text-sm">Size: 1.2MB | Format: PDF</p>
       </div>
       <a 
         href="/resume.pdf" 
@@ -39,5 +72,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </svg>
       </a>
     </section>
+
+    <section class="mb-24 flex justify-center">
+      <a 
+        href="/projects" 
+        class="group relative inline-flex items-center justify-center px-10 py-5 font-black text-white transition-all duration-200 bg-amber-500 font-mono text-lg uppercase tracking-widest rounded-2xl hover:bg-amber-400 hover:scale-105 hover:shadow-[0_0_40px_-10px_rgba(245,158,11,0.5)] active:scale-95"
+      >
+        <span>Check out my projects</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 ml-3 transform transition-transform group-hover:translate-x-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+        </svg>
+      </a>
+    </section>
+
   </main>
 </BaseLayout>

@@ -14,6 +14,28 @@
     prose-strong:text-slate-900;
 }
 
+/* Custom style and color for unordered lists (bullets) */
+.prose-engineering ul li::marker {
+  color: var(--color-blue-600);
+  font-weight: bold;
+  font-size: 1.25em;
+  content: "▹ ";
+}
+
+/* Keep ordered lists (numbers) intact, just change their color */
+.prose-engineering ol li::marker {
+  color: var(--color-blue-600);
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.prose-engineering .not-prose ul li::marker {
+  color: var(--color-yellow-500);
+  content: "▹ ";
+  font-size: 1.25em;
+  font-weight: bold;
+}
+
 /* Add some breathing room when clicking sidebar links */
 .prose-engineering h2,
 .prose-engineering h3 {
