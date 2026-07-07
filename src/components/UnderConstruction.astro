@@ -1,0 +1,50 @@
+---
+// src/components/UnderConstruction.astro
+---
+
+<div class="not-prose my-12 relative overflow-hidden rounded-2xl border-2 border-amber-400 bg-amber-50 shadow-sm">
+  
+  <div class="hazard-stripes absolute inset-0 opacity-10"></div>
+  
+  <div class="relative z-10 flex flex-col md:flex-row items-center gap-6 p-6 md:p-8 text-center md:text-left">
+    
+    <div class="flex-shrink-0 drop-shadow-sm text-amber-500">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-16 h-16 md:w-20 md:h-20">
+        <path fill-rule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L7.05 15H4.5a.75.75 0 000 1.5h15a.75.75 0 000-1.5h-2.55l-2.178-11.183a1.875 1.875 0 00-1.844-1.567h-.85zM9.066 10.5l-.584 3h7.036l-.584-3H9.066zM10.234 4.5l-.292 1.5h4.116l-.292-1.5h-3.532z" clip-rule="evenodd" />
+      </svg>
+    </div>
+    
+    <div>
+      <h2 class="text-lg md:text-xl font-black text-amber-600 uppercase tracking-widest mb-2 flex items-center justify-center md:justify-start gap-2">
+        Work In Progress
+      </h2>
+      <p class="text-sm text-amber-800 font-medium leading-relaxed max-w-xl">
+        This project log is currently under construction! I'm actively building, testing, or documenting this section. Check back later for the full breakdown!
+      </p>
+    </div>
+    
+  </div>
+</div>
+
+<style>
+  .hazard-stripes {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 1rem,
+      #fbbf24 1rem,
+      #fbbf24 2rem
+    );
+    background-size: 200% 200%;
+    animation: slideStripes 3s linear infinite;
+  }
+
+  @keyframes slideStripes {
+    0% {
+      background-position: 0 0;
+    }
+    100% {
+      background-position: 2.828rem 0; 
+    }
+  }
+</style>

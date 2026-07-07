@@ -1,0 +1,438 @@
+---
+title: "Stabilizing Magnetic Continuum Robots"
+date: 2026-05-20
+description: 'My B.A.Sc. thesis on minimizing "snapping behavior" in tendon-driven magnetic continuum robots using inertial feedback.'
+tags: ["Control Systems", "PCB Design", "Sensor Integration", "Python", "Inertial Measurement Units (IMUs)"]
+---
+
+import CadViewer from '../../components/CadViewer.jsx';
+import CodeSnippet from '../../components/CodeSnippet.astro';
+import TldrBubble from '../../components/TldrBubble.astro';
+import { Image } from 'astro:assets';
+
+import bot from '../../assets/thesis/CR.jpg';
+import simplified_diag from '../../assets/thesis/Simplification.jpg'
+import test_setup from '../../assets/thesis/Test Setup2.png'
+import layout from '../../assets/thesis/layout.png'
+import system_diag from '../../assets/thesis/Connections Chart.png'
+import imu from '../../assets/thesis/Real_IMU.jpg'
+import imu_connections from '../../assets/thesis/IMU_connections.jpg'
+import cam_frame from '../../assets/thesis/frame.png'
+import baseline from '../../assets/thesis/Baseline.png'
+import compensation from '../../assets/thesis/Seg0 snap with comp.png'
+import comp_profile from '../../assets/thesis/compensation_profile_plot.png'
+import control_law from '../../assets/thesis/equation.png'
+import controller_off from '../../assets/thesis/Controller_Off.png'
+import controller_on from '../../assets/thesis/Controller_On.png'
+
+<TldrBubble>
+  If you're short on time and want to skip all the yap, here is a quick rundown of what I actually built and achieved with this project:
+
+  <ul>
+    <li><strong>The Goal:</strong> I aimed to develop an active compensation control system to improve the operating stability of magnetic continuum robots intended for minimally invasive surgery.</li>
+    <li><strong>Custom Hardware:</strong> I designed and integrated a tiny 10 mm diameter PCB featuring a high-performance IMU right into the tip of the robot, along with a test setup I designed to validate the control approaches.</li>
+    <li><strong>Software Integration:</strong> I put together a multi-process Python control pipeline that combines IMU sensor polling, motor actuation, and computer vision tracking in parallel.</li>
+    <li><strong>The Results:</strong> I managed to damp the vibrations during magnetic unjoining through developing and automatically triggering compensation profiles through IMU feedback, reducing the robot tip's transient overshoot from a 25 mm baseline down to under 3 mm.</li>
+    <li><strong>What's Next:</strong> While the compensation profiles provided promising results, my attemps at a more generalizable feedback control approach for active damping proved mostly unsuccessful due to system/actuator lag. I'm currently working to extend this work into a more general disturbance rejection method through the use of more agile direct-drive actuators. My goals is to submit a paper to the IEEE International Conference on Robotics & Automation (ICRA).</li>
+  </ul>
+</TldrBubble>
+
+<h2 id="overview">Overview</h2>
+Continuum robots (often abbreviated as CRs) are these awesome bio-inspired devices that I had the 
+pleasure of working with for my undergraduate thesis project. Much like an octopus' tentacle or an anteater's tongue,
+these robots specialize and offer distinct advantages in navigating confined spaces due to their slender shape and 
+physical compliance. For this reason, they have been researched for many years for use in applications such as minimally 
+invasive surgery.
+
+<figure class="my-8 flex flex-col items-center">
+  <Image src={bot} alt="Continuum Robot Diagram" class="max-w-4xl w-full rounded-lg shadow-sm border border-slate-200" />
+  
+  <figcaption class="text-center text-xs text-slate-500 mt-3 font-mono">
+    Source: <a href="https://magazine.utoronto.ca/research-ideas/technology/robots-are-taking-on-new-shapes-continuum-robotics-burgner-kahrs/" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">*University of Toronto Magazine*</a>
+  </figcaption>
+</figure>
+
+Unfortunately, the compliance of these devices is also a curse in addition to a blessing, as they can often sag,
+buckle, and vibrate undesireably as a result of interactions with their enivronment. My thesis project centered 
+around minimizing some of these effects with new control strategies for tendon-driven continuum robots (TDCRs), 
+a popular variant of CRs driven by internal cables called tendons.
+
+
+<h3>Magnetic TDCRs and the "Snapping" Problem</h3>
+The particular situation my project focused on is what you see in the video below. Folks at the 
+*<a href="https://crl.utm.utoronto.ca/" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">Continuum Robotics Laboratory</a>*
+have been looking into joining multiple CRs as an approach for increasing stiffeness for force application tasks. 
+This is potentially a great solution, as each robot would be navigated into the operating space with it's own 
+compliance and manipulability, and only join to brace eachother for some high-load task near the region of interest.
+
+My thesis mentor Ella was working on a version of this idea, creating TDCRs which can join to eachother using 
+passive embedded magnets, when she noticed that unjoing her protoypes often resulted these erratic "snaps". 
+Even with design changes such as making one of the robots retractable, it was hard to avoid this situation where 
+elastic energy would build up in the robots trying to unjoin until the magnets finally gave way, flinging them 
+every which way.
+
+<figure class="my-8">
+  <video 
+    autoplay 
+    loop 
+    muted 
+    playsinline 
+    class="w-full rounded-lg shadow-sm border border-slate-300"
+  >
+    <source src="/videos/snapping_compressed.mp4" type="video/mp4" />
+    Your browser does not support the video tag.
+  </video>
+  <figcaption class="text-center text-xs text-slate-500 mt-3 font-mono">
+    Video Credit: *Ella Walsh*
+  </figcaption>
+</figure>
+
+<h2>The Approach</h2>
+To solve this instability, I proposed a solution based on applying a control scheme to perform active tendon compensation driven by 
+high-speed inertial feedback. In other words, my plan was to sense the acceleration spikes during magnetic unjoining, 
+and dynamically adjust the tension in the robot's tendons to actively dampen and counteract the elastic release.
+This idea to use the existing means of actuation of the robot to counteract snapping behavior keeps the robot simple, and saves 
+the added size and physical complexity (in an already size constrained medical device) that would come with an add-on 
+type solution. The trade-off is of course added complexity in the control (and a source of feedback) needed to acheive damping 
+through dynamic real-time tension adjustments.
+
+<h3>Simplifying the Problem</h3>
+Given that this is a complex problem with many facets and a limited amount of time to address, my supervisors and mentor strongly 
+encouraged me to scope down and simplify as much as possible, and I'm glad they did. I ended up deciding on working with a 
+simplified version of this problem depicted below, where instead of looking at the full case of two magnetic TDCRs unjoing in 
+3D with it's many variations, I would create a test setup where I could look at the snapping response of a single TDCR constrained 
+to a 2D plane joining distally with a fixed set of magnets. This way, I could study the simplest form of the snapping problem in the 
+hopes of devloping control methods that could be extended in the future.
+
+<figure class="my-8 flex flex-col items-center">
+  <Image src={simplified_diag} alt="Test Setup Diagram" class="max-w-4xl w-full rounded-lg shadow-sm border border-slate-200" />
+</figure>
+
+<h2>Building the Test Setup</h2>
+To actually conduct experiments described above, I needed to integrate the 2D magnetic CR and fixed magnets in a system which
+could control the robot, observe it's motion to gauge performance, and collect/act on inertial measurments. I already had at my 
+disposal the *Dynamixel* smart servos and the driver board that the lab usually uses to drive CRs, and worked on top of this 
+to create a useful test setup. The typical workflow was to have a central PC running a python program and sending commands to the motor 
+controller over USB through the use of the *Dynamixel SDK*. To allow for the clean seperation of subsystems, as well as parallelism 
+which would allow me to run my control loops as fast as possible, I decided to add an additional 2 USB branches which would be 
+responsible for relaying the intertial feedback and readings of the robot's motion over time. As you'll see, the final software
+achitecture will have dedicated parallel Python processes parsing these incoming data streams and dumping them into shared memory
+for a main process handling the robot's control to use as it sees fit.
+
+<figure class="my-8 flex flex-col items-center">
+  <Image src={system_diag} alt="System Diagram" class="max-w-2xl w-full rounded-lg shadow-sm border border-slate-200" />
+</figure>
+
+<h3>Small Side Quest: Camera Tracking</h3>
+For the purposes of gathering experimental data on snapping response during experiments, I decided on a simple yet effective
+solution. Snapping is most pronounced (and arguably most important, being the location of the tool/payload) at the tip of the robot, 
+and through adding a small colored marker to the tip, an overhead camera can easily capture the tip positon over time. This can 
+be used to get useful metrics such as snapping amplitude, frequency, or duration. It's as easy as extracting a color mask in OpenCV and 
+computing it's centroid frame by frame (+ some de-noising and mm conversion steps but you get the idea), something which can be done 
+quickly and reliably.
+
+<figure class="my-8 flex flex-col items-center">
+  <Image src={cam_frame} alt="Camera Frame" class="max-w-2xl w-full rounded-lg shadow-sm border border-slate-200" />
+  
+  <figcaption class="text-center text-xs text-slate-500 mt-3 font-mono">
+    Example Frame from Tracking Camera.
+  </figcaption>
+</figure>
+
+<h3>Big Side Quest: Compact IMU PCB</h3>
+Unlike the camera tracking which probably took a total of 30 minutes to get working, the IMU integration for this project turned into
+one of the more involved and satisfying parts of the whole thing. It was my first time making a PCB this tiny, I had a ton of fun, 
+and I learned a whole bunch about IMUs in the process.
+
+At first I thought that I could just just slap an off-the-shelf breakout board on my robot, but I quickly realized that:
+<ul>
+  <li>
+  At 10mm in diameter, my robot didn't have the real estate to accomodate typical breakout boards (around 20-30mm) without 
+  significantly changing the dynamics of the robot (i.e., a big fat sensor board swinging around on the front of a tiny robot
+  would ruin everything).
+  </li>
+  <li>
+  IMU ICs are not created equal and the widely available breakout boards often feature only a small subset of these ICs, with 
+  features/layouts favoring convience and versatility over compactness and performance.
+  </li>
+</ul>
+
+And so I needed a custom board to fit my needs. After some experiments to determine the vibration frquencies I could expect from my
+robot and some research on IMUs and the specs of different IC offerings, I settled on a chip to build my board around. The LSM6DSV16X 
+by STMicroelectronics is the sensor I settled on, a high performance 6-axis IMU featuring a tiny 2.5x3mm footprint, good range and 
+low noise, an ODR up to 7.68Khz, and some existing firmware libraries so I wouldn't have to start from zero.
+
+<div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch my-8">
+  <div class="w-full flex flex-col"> 
+    <CadViewer 
+      client:only="react" 
+      modelPath="/models/compact_IMU.glb" 
+      cameraPos={[0, 100, 1000]} 
+      ambientIntensity={0.5}
+      envPreset="night"
+      containerHeight="h-[300px] md:h-auto md:flex-1"
+      containerMargin="!m-0"
+    />
+  </div>
+  
+  <div class="w-full flex">
+    <figure class="!m-0 !p-0 w-full"> 
+      <Image 
+        src={layout} 
+        alt="PCB Layout" 
+        class="!m-0 w-full h-auto rounded-xl shadow-sm border border-slate-200 block" 
+      />
+    </figure>
+  </div>
+</div>
+
+My PCB design was able to squeeze in everything I needed to poll the sensor over SPI (or I2C by completing some solder bridges) in a 
+10mm diameter 2 layer board, fitting snugly within the spacer disks of my robot. Small contact pads on the back of the board 
+allow neat routing of power and communication wires down and away from the robot tip. In a real application, these wires would be 
+routed down an internal channel within the robot, but for convience and debugging, I let them flow outside the robot for my test 
+setup. Soldering the teeny tiny enameled wires onto the back of this board was super annoying, but seeing it work for the first time made 
+me forget all of that. So cool.
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 my-8">
+  <figure>
+    <Image 
+      src={imu} 
+      alt="Manufactured IMU PCB (Finger for Scale)" 
+      class="w-full rounded-xl border border-slate-200 shadow-sm"
+    />
+    <figcaption class="text-center text-xs text-slate-500 mt-3 font-mono">
+      Manufactured PCB On My Index Finger (So Tiny!)
+    </figcaption>
+  </figure>
+
+  <figure>
+    <Image 
+      src={imu_connections}
+      alt="PCB Soldered Connections" 
+      class="w-full rounded-xl border border-slate-200 shadow-sm"
+    />
+    <figcaption class="text-center text-xs text-slate-500 mt-3 font-mono">
+      Annoying Teeny Tiny Soldering
+    </figcaption>
+  </figure>
+</div>
+
+<h3>Putting It All Together</h3>
+A few 3D prints and a bunch of behind the scenes coding work later, I had a test setup which successfully integrated the control 
+and measurment subsystems I had planned for. If you're interested in the details, you can check out the full code 
+<a href="https://github.com/AdrianShkumbov/Thesis_Code" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">here</a>.
+
+<figure class="my-8 flex flex-col items-center">
+  <Image src={test_setup} alt="Test Setup" class="max-w-4xl w-full rounded-lg shadow-sm border border-slate-200" />
+</figure>
+
+As mentioned before, each subsytem is associated with a USB port on the PC, with auxiliary Python proceesses parsing incoming data
+from the IMU and camera in parallel and dumping relevant real-time info into the main process performing motor control and data visualization.
+A stripped down version of the main process code is shown below so you can get a rough idea of how things were structured.
+
+<CodeSnippet 
+  title="main.py" 
+  lang="python"
+  code={`#!/usr/bin/env python3
+
+import numpy as np
+import multiprocessing
+import time
+from multiprocessing import shared_memory
+
+from tracking_cam import TrackingCam
+from imu import IMUReader
+from continuum_robot import CR
+
+# Constants for creating shared memory of the right size for tip position
+TIP_POS_SHAPE = (1, 2)  # [x, y] array
+TIP_POS_DATA_TYPE = np.float64
+TIP_POS_SIZE = int(np.dtype(TIP_POS_DATA_TYPE).itemsize * np.prod(TIP_POS_SHAPE))
+
+# Constants for IMU shared memory
+IMU_SHAPE = (1, 6)  # [ax, ay, az, gx, gy, gz]
+IMU_DATA_TYPE = np.float64
+IMU_SIZE = int(np.dtype(IMU_DATA_TYPE).itemsize * np.prod(IMU_SHAPE))
+
+BOT_PORT = '/dev/ttyUSB0'
+IMU_PORT = '/dev/ttyUSB1'
+
+
+if __name__ == "__main__":
+    multiprocessing.set_start_method("spawn") 
+
+    # Creating shared memory to hold data from each process
+    tip_pos_mem = shared_memory.SharedMemory(create=True, size=TIP_POS_SIZE, name="tip_pos")
+    tip_pos = np.ndarray(shape=TIP_POS_SHAPE, dtype=TIP_POS_DATA_TYPE, buffer=tip_pos_mem.buf)
+
+    imu_mem = shared_memory.SharedMemory(create=True, size=IMU_SIZE, name="imu_data")
+    imu_data = np.ndarray(shape=IMU_SHAPE, dtype=IMU_DATA_TYPE, buffer=imu_mem.buf)
+
+    stop_event = multiprocessing.Event()
+    tip_cam = TrackingCam(name="tip_cam", stop_event=stop_event)
+    imu = IMUReader(name="imu", port=IMU_PORT, baudrate=2000000, stop_event=stop_event)
+
+    # Starting processes
+    tip_cam.start()
+    imu.start()
+    
+    # -----------------------------------------------------------------------------------------
+    motor_ids = np.array([0, 1, 2, 3], dtype=np.uint8)
+    motor_map = np.array([[0, 3], [1, 2]], dtype=np.uint8)  
+    
+    squiggly = CR(motor_ids, motor_map) # A cute name for a cute boy
+    squiggly.startup(BOT_PORT)
+
+    # ... START RUNNING TESTS HERE ...
+
+    # -----------------------------------------------------------------------------------------
+
+    print("Shutting down processes and saving data...")
+    stop_event.set()
+
+    tip_cam.join()
+    imu.join()
+    print("Data saved successfully.")
+
+    release_shared_mem("tip_pos")
+    release_shared_mem("imu_data")
+
+    print("Plotting Data")
+    plot_sensor_data()
+    
+  `} 
+/>
+
+<h2>Testing & Results</h2>
+So with the foundational engineering work complete, it was finally time to experiment with what I had created and try and acheive
+my goal of snapping compensation through tendon action. I'll spare you all the experimental details and just show what I think
+the coolest parts were here. If you happpen to be curious about some detail of the experiments, or any part of this project for that
+matter, you can find my full thesis available for download at the bottom of this page.
+
+<h3>Baseline</h3>
+Of course, the first step is always to get a baseline to compare future results against. Commanding a distal join in the test setup and 
+naively trying to return to the neutral position results in a response shown by the IMU and camera tacking data below. As expected,
+we see an elastic release causing the robot tip to swing back and forth, resulting in an overshoot of about 25 mm.
+
+<figure class="my-8 flex flex-col items-center">
+  <Image src={baseline} alt="Baseline Snapping Response Graph" class="max-w-3xl w-full rounded-lg shadow-sm border border-slate-200" />
+</figure>
+
+<h3>What Worked: IMU Triggered Compensation Profiles</h3>
+After some time trying and failing, what ended working was a simple approach of tuning a pre-programmed compensation profile to be 
+executed when the IMU detected a snap. These profiles consisted of a series of position setpoints sent in 50ms intervals for the 
+robot's motors to follow, designed to counteract the elastic release and dampen the tip's motion to the neutral position. The IMU's 
+high-speed feedback allowed for quick detection of the snap event via an acceleration and/or jerk threshold crossing, triggering 
+the compensation profile below, shown in terms of tendon lengths corresponding to the motor position setpoints.
+
+<figure class="my-8 flex flex-col items-center">
+  <Image src={comp_profile} alt="Compensation Profile Plot" class="max-w-3xl w-full rounded-lg shadow-sm border border-slate-200" />
+</figure>
+
+With the compensation profile executed during snapping, the results were quite promising. The overshoot was reduced from 25 mm down 
+to under 3 mm, showing that active tendon compensation can minimize snapping behavior. In additon, this approach could be generalized 
+to a more general 3D snapping case, taking the intial direction and magnitude of the sudden acceleration into account to dynamically 
+generate a compensation profile to execute. The side-by-side videos below show the substantial difference between the baseline regular unjoining 
+and the IMU-triggered compensation profile. Seeing the robot stop dead like that for the first time had me doubting my sanity for a second, 
+but after trying it 10 more times and confirming it really did work, it was a great feeling for sure. 
+
+<figure class="my-8 flex flex-col items-center">
+  <Image src={compensation} alt="Snapping with Compensation Response Graph" class="max-w-3xl w-full rounded-lg shadow-sm border border-slate-200" />
+</figure>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-8">
+  <figure>
+    <video 
+      src="/videos/baseline_compressed.mp4"
+      autoplay 
+      loop 
+      muted 
+      playsinline
+      class="w-full aspect-[9/16] object-cover rounded-xl border border-slate-200 shadow-sm bg-slate-100"
+    ></video>
+    <figcaption class="text-center text-sm text-gray-500 mt-3">
+      No Compensation (Naive Commands)
+    </figcaption>
+  </figure>
+
+  <figure>
+    <video 
+      src="/videos/comp_compressed.mp4"
+      autoplay 
+      loop 
+      muted 
+      playsinline
+      class="w-full aspect-[9/16] object-cover rounded-xl border border-slate-200 shadow-sm bg-slate-100"
+    ></video>
+    <figcaption class="text-center text-sm text-gray-500 mt-3">
+      Compensation Profile Executed During Unjoining
+    </figcaption>
+  </figure>
+</div>
+
+<h3>Full Feedback Control: Not Quite</h3>
+While the compensation profile approach worked great on my test setup, relying on pre-programmed profiles is not easily generalizable across all 
+unjoining scenarios, and especially across different TDCRs. To address this lack of universality, full active feedback control was my next goal for
+more effective solution.
+
+<figure class="my-8 flex flex-col items-center">
+  <Image src={control_law} alt="Control Law Equation" class="max-w-2xl w-full rounded-lg shadow-sm border border-slate-200" />
+</figure>
+
+Using a piecewise constant curvature (PCC) kinematic model for my robot which represents each segment in my robot as a constant curvature arc, 
+I came up with a simple control law to try. This law aims to both drive the robot to a desired pose (paramaterized by its two segment curvatures) while
+also damping large lateral tip accelerations using the IMU's accelerometer. The segment weighting on the IMU term above stems from the fact that this 
+one-dimensional IMu measurement needs to translate into a two-dimensional control action. Intuitively, we know that the curvature of the base segment 
+influences the tip position far more than the tip segment due to a lever arm effect. To determine the appropriate weighting, I used the PCC model 
+description of the lateral tip coordinate $X(\kappa_1, \kappa_2)$ to compute the Jacobian of the tip position with respect to the segment curvatures.
+If you work through the math, you get something like this:
+
+$$
+X(\kappa_1, \kappa_2) = \frac{1 - \cos(\kappa_1 L_1)}{\kappa_1} + \frac{\cos(\kappa_1 L_1) - \cos(\kappa_1 L_1 + \kappa_2 L_2)}{\kappa_2}
+$$
+
+$$
+\frac{\partial X}{\partial \kappa_1} = \frac{\kappa_1 L_1 \sin(\kappa_1 L_1) + \cos(\kappa_1 L_1) - 1}{\kappa_1^2} + \frac{L_1 (\sin(\kappa_1 L_1 + \kappa_2 L_2) - \sin(\kappa_1 L_1))}{\kappa_2}
+$$
+
+$$
+\frac{\partial X}{\partial \kappa_2} = \frac{\kappa_2 L_2 \sin(\kappa_1 L_1 + \kappa_2 L_2) + \cos(\kappa_1 L_1 + \kappa_2 L_2) - \cos(\kappa_1 L_1)}{\kappa_2^2}
+$$
+
+
+Computing the ratio of the two partials $\frac{\partial X}{\partial \kappa_1} : \frac{\partial X}{\partial \kappa_2}$ for different configurations around 
+the robot's neutral position (which was my desired end pose for my tests), I found that this ratio sticks pretty closely to 3:1, yielding the normalized 
+weighting of $\begin{bmatrix} 0.25 & 0.75 \end{bmatrix}^T$ found in the control law.
+
+<div class="not-prose grid grid-cols-1 md:grid-cols-2 gap-8 my-8">
+  <figure>
+    <Image alt="Controller Off Graph" class="w-full rounded-xl border border-slate-200 shadow-sm" src={controller_off}/>
+    <figcaption class="text-center text-xs text-slate-500 mt-3 font-mono">
+      Controller Off: 14mm Overshoot, 309ms Settling Time
+    </figcaption>
+  </figure>
+
+  <figure>
+    <Image alt="Controller On Graph" class="w-full rounded-xl border border-slate-200 shadow-sm" src={controller_on}/>
+    <figcaption class="text-center text-xs text-slate-500 mt-3 font-mono">
+      Controller On: 8mm Overshoot, 404ms Settling Time
+    </figcaption>
+  </figure>
+</div>
+
+The results? Not quite what I was looking for. With the controller active and the tendons pre-tensioned for maximum control sensitivity, the robot's 
+initial snapping overshoot was somewhat reduced from a 14 mm baseline down to 8 mm. However, the settling time actually increased from the uncontrolled 
+baseline of 309 ms to 404 ms. While my control loop running on the PC was spiting out commands at over 200 Hz, it seems the physical action frequency 
+of the system was bottlenecked. As a result, the physical tendon response lagged behind the robot's movement, inadvertently pumping energy into the 
+vibration instead of damping it out.
+
+<h2>Take-Aways & What's Next</h2>
+Overall, I had a great time with this project. It was a unique opportunity to really start from a difficult problem and propose and develop a mechatronic 
+solution from the ground up. It successfully proved that tip-mounted IMUs and active tendon compensation can be effective for stabilizing magnetically 
+joinable continuum robots in certain scenarios, keeping them within surgical safety margins. However, I'm ready to give up just yet. The mechanical 
+lag from the smart servos which led to feedback control being ineffective is a problem I think can be solved with more agile actuators and a more 
+optimized system architecture, and so I'm continuing my work into the summer with the goal of publishing a paper to a conference like ICRA. 
+For this next iteration, I plan to move away from the PC-based Python and USB stack. Instead, I'll be porting the control over to run entirely on a high
+performance microcontroller to achieve the fastest control loops possible. For the actuators, I will be upgrading to direct-drive brushless motors. By 
+utilizing high-performance controllers communicating over a high-speed CAN-FD bus for torque (rather than position) control, I hope to achieve a much 
+more agile system capable of real-time snapping compensation. If you're interested in that, stay tuned for a future post where I will be detailing my progress!
