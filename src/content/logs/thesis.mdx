@@ -2,7 +2,7 @@
 title: "Stabilizing Magnetic Continuum Robots"
 date: 2026-05-20
 description: 'My B.A.Sc. thesis on minimizing "snapping behavior" in tendon-driven magnetic continuum robots using inertial feedback.'
-tags: ["Control Systems", "PCB Design", "Sensor Integration", "Python", "Inertial Measurement Units (IMUs)"]
+tags: ["Robotic Control", "PCB Design", "Sensor Integration", "Python", "Inertial Measurement Units (IMUs)"]
 ---
 
 import CadViewer from '../../components/CadViewer.jsx';
@@ -33,7 +33,7 @@ import controller_on from '../../assets/thesis/Controller_On.png'
     <li><strong>Custom Hardware:</strong> I designed and integrated a tiny 10 mm diameter PCB featuring a high-performance IMU right into the tip of the robot, along with a test setup I designed to validate the control approaches.</li>
     <li><strong>Software Integration:</strong> I put together a multi-process Python control pipeline that combines IMU sensor polling, motor actuation, and computer vision tracking in parallel.</li>
     <li><strong>The Results:</strong> I managed to damp the vibrations during magnetic unjoining through developing and automatically triggering compensation profiles through IMU feedback, reducing the robot tip's transient overshoot from a 25 mm baseline down to under 3 mm.</li>
-    <li><strong>What's Next:</strong> While the compensation profiles provided promising results, my attemps at a more generalizable feedback control approach for active damping proved mostly unsuccessful due to system/actuator lag. I'm currently working to extend this work into a more general disturbance rejection method through the use of more agile direct-drive actuators. My goals is to submit a paper to the IEEE International Conference on Robotics & Automation (ICRA).</li>
+    <li><strong>What's Next:</strong> While the compensation profiles provided promising results, my attempts at a more generalizable feedback control approach for active damping proved mostly unsuccessful due to system/actuator lag. I'm currently working to extend this work into a more general disturbance rejection method through the use of more agile direct-drive actuators. My goal is to submit a paper to the IEEE International Conference on Robotics & Automation (ICRA).</li>
   </ul>
 </TldrBubble>
 
@@ -53,7 +53,7 @@ invasive surgery.
 </figure>
 
 Unfortunately, the compliance of these devices is also a curse in addition to a blessing, as they can often sag,
-buckle, and vibrate undesireably as a result of interactions with their enivronment. My thesis project centered 
+buckle, and vibrate undesireably as a result of interactions with their environment. My thesis project centered 
 around minimizing some of these effects with new control strategies for tendon-driven continuum robots (TDCRs), 
 a popular variant of CRs driven by internal cables called tendons.
 
@@ -63,10 +63,10 @@ The particular situation my project focused on is what you see in the video belo
 *<a href="https://crl.utm.utoronto.ca/" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">Continuum Robotics Laboratory</a>*
 have been looking into joining multiple CRs as an approach for increasing stiffeness for force application tasks. 
 This is potentially a great solution, as each robot would be navigated into the operating space with it's own 
-compliance and manipulability, and only join to brace eachother for some high-load task near the region of interest.
+compliance and manipulability, and only join to brace each other for some high-load task near the region of interest.
 
-My thesis mentor Ella was working on a version of this idea, creating TDCRs which can join to eachother using 
-passive embedded magnets, when she noticed that unjoing her protoypes often resulted these erratic "snaps". 
+My thesis mentor Ella was working on a version of this idea, creating TDCRs which can join to each other using 
+passive embedded magnets, when she noticed that unjoining her protoypes often resulted these erratic "snaps". 
 Even with design changes such as making one of the robots retractable, it was hard to avoid this situation where 
 elastic energy would build up in the robots trying to unjoin until the magnets finally gave way, flinging them 
 every which way.
@@ -99,7 +99,7 @@ through dynamic real-time tension adjustments.
 <h3>Simplifying the Problem</h3>
 Given that this is a complex problem with many facets and a limited amount of time to address, my supervisors and mentor strongly 
 encouraged me to scope down and simplify as much as possible, and I'm glad they did. I ended up deciding on working with a 
-simplified version of this problem depicted below, where instead of looking at the full case of two magnetic TDCRs unjoing in 
+simplified version of this problem depicted below, where instead of looking at the full case of two magnetic TDCRs unjoining in 
 3D with it's many variations, I would create a test setup where I could look at the snapping response of a single TDCR constrained 
 to a 2D plane joining distally with a fixed set of magnets. This way, I could study the simplest form of the snapping problem in the 
 hopes of devloping control methods that could be extended in the future.
@@ -147,17 +147,17 @@ and I learned a whole bunch about IMUs in the process.
 At first I thought that I could just just slap an off-the-shelf breakout board on my robot, but I quickly realized that:
 <ul>
   <li>
-  At 10mm in diameter, my robot didn't have the real estate to accomodate typical breakout boards (around 20-30mm) without 
+  At 10mm in diameter, my robot didn't have the real estate to accommodate typical breakout boards (around 20-30mm) without 
   significantly changing the dynamics of the robot (i.e., a big fat sensor board swinging around on the front of a tiny robot
   would ruin everything).
   </li>
   <li>
   IMU ICs are not created equal and the widely available breakout boards often feature only a small subset of these ICs, with 
-  features/layouts favoring convience and versatility over compactness and performance.
+  features/layouts favoring convenience and versatility over compactness and performance.
   </li>
 </ul>
 
-And so I needed a custom board to fit my needs. After some experiments to determine the vibration frquencies I could expect from my
+And so I needed a custom board to fit my needs. After some experiments to determine the vibration frequencies I could expect from my
 robot and some research on IMUs and the specs of different IC offerings, I settled on a chip to build my board around. The LSM6DSV16X 
 by STMicroelectronics is the sensor I settled on, a high performance 6-axis IMU featuring a tiny 2.5x3mm footprint, good range and 
 low noise, an ODR up to 7.68Khz, and some existing firmware libraries so I wouldn't have to start from zero.
@@ -189,7 +189,7 @@ low noise, an ODR up to 7.68Khz, and some existing firmware libraries so I would
 My PCB design was able to squeeze in everything I needed to poll the sensor over SPI (or I2C by completing some solder bridges) in a 
 10mm diameter 2 layer board, fitting snugly within the spacer disks of my robot. Small contact pads on the back of the board 
 allow neat routing of power and communication wires down and away from the robot tip. In a real application, these wires would be 
-routed down an internal channel within the robot, but for convience and debugging, I let them flow outside the robot for my test 
+routed down an internal channel within the robot, but for convenience and debugging, I let them flow outside the robot for my test 
 setup. Soldering the teeny tiny enameled wires onto the back of this board was super annoying, but seeing it work for the first time made 
 me forget all of that. So cool.
 
@@ -330,7 +330,7 @@ the compensation profile below, shown in terms of tendon lengths corresponding t
 </figure>
 
 With the compensation profile executed during snapping, the results were quite promising. The overshoot was reduced from 25 mm down 
-to under 3 mm, showing that active tendon compensation can minimize snapping behavior. In additon, this approach could be generalized 
+to under 3 mm, showing that active tendon compensation can minimize snapping behavior. In addition, this approach could be generalized 
 to a more general 3D snapping case, taking the intial direction and magnitude of the sudden acceleration into account to dynamically 
 generate a compensation profile to execute. The side-by-side videos below show the substantial difference between the baseline regular unjoining 
 and the IMU-triggered compensation profile. Seeing the robot stop dead like that for the first time had me doubting my sanity for a second, 
@@ -382,7 +382,7 @@ more effective solution.
 Using a piecewise constant curvature (PCC) kinematic model for my robot which represents each segment in my robot as a constant curvature arc, 
 I came up with a simple control law to try. This law aims to both drive the robot to a desired pose (paramaterized by its two segment curvatures) while
 also damping large lateral tip accelerations using the IMU's accelerometer. The segment weighting on the IMU term above stems from the fact that this 
-one-dimensional IMu measurement needs to translate into a two-dimensional control action. Intuitively, we know that the curvature of the base segment 
+one-dimensional IMU measurement needs to translate into a two-dimensional control action. Intuitively, we know that the curvature of the base segment 
 influences the tip position far more than the tip segment due to a lever arm effect. To determine the appropriate weighting, I used the PCC model 
 description of the lateral tip coordinate $X(\kappa_1, \kappa_2)$ to compute the Jacobian of the tip position with respect to the segment curvatures.
 If you work through the math, you get something like this:
@@ -422,17 +422,32 @@ weighting of $\begin{bmatrix} 0.25 & 0.75 \end{bmatrix}^T$ found in the control 
 
 The results? Not quite what I was looking for. With the controller active and the tendons pre-tensioned for maximum control sensitivity, the robot's 
 initial snapping overshoot was somewhat reduced from a 14 mm baseline down to 8 mm. However, the settling time actually increased from the uncontrolled 
-baseline of 309 ms to 404 ms. While my control loop running on the PC was spiting out commands at over 200 Hz, it seems the physical action frequency 
+baseline of 309 ms to 404 ms. While my control loop running on the PC was spitting out commands at over 200 Hz, it seems the physical action frequency 
 of the system was bottlenecked. As a result, the physical tendon response lagged behind the robot's movement, inadvertently pumping energy into the 
 vibration instead of damping it out.
 
 <h2>Take-Aways & What's Next</h2>
 Overall, I had a great time with this project. It was a unique opportunity to really start from a difficult problem and propose and develop a mechatronic 
 solution from the ground up. It successfully proved that tip-mounted IMUs and active tendon compensation can be effective for stabilizing magnetically 
-joinable continuum robots in certain scenarios, keeping them within surgical safety margins. However, I'm ready to give up just yet. The mechanical 
+joinable continuum robots in certain scenarios, keeping them within surgical safety margins. However, I'm not ready to give up just yet. The mechanical 
 lag from the smart servos which led to feedback control being ineffective is a problem I think can be solved with more agile actuators and a more 
 optimized system architecture, and so I'm continuing my work into the summer with the goal of publishing a paper to a conference like ICRA. 
-For this next iteration, I plan to move away from the PC-based Python and USB stack. Instead, I'll be porting the control over to run entirely on a high
-performance microcontroller to achieve the fastest control loops possible. For the actuators, I will be upgrading to direct-drive brushless motors. By 
+For this next iteration, I plan to move away from the PC-based Python and USB stack. Instead, I'll be porting the control over to run entirely in bare 
+metal C on a high clock speed microcontroller to achieve the fastest control loops possible. For the actuators, I will be upgrading to direct-drive brushless motors. By 
 utilizing high-performance controllers communicating over a high-speed CAN-FD bus for torque (rather than position) control, I hope to achieve a much 
 more agile system capable of real-time snapping compensation. If you're interested in that, stay tuned for a future post where I will be detailing my progress!
+
+<div class="not-prose mt-16 p-8 bg-slate-900 rounded-2xl text-white flex flex-col items-center text-center shadow-2xl">
+  <p class="text-slate-400 font-mono text-md mb-8">Download my full B.A.Sc. thesis document here:</p>
+  
+  <a 
+    href="/Thesis_Adrian_Shkumbov.pdf" 
+    download 
+    class="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition-all transform hover:scale-105 flex items-center gap-2"
+  >
+    <span>DOWNLOAD THESIS PDF</span>
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+      <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+    </svg>
+  </a>
+</div>

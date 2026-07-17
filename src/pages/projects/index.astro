@@ -1,6 +1,12 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { Image } from 'astro:assets';
+
+// Import the project icons
+import iconCr from '../../assets/project_icons/cr.png';
+import iconDatboi from '../../assets/project_icons/datboi.jpg';
+import iconEmg from '../../assets/project_icons/emg.png';
 
 const allProjects = await getCollection('logs');
 
@@ -13,6 +19,13 @@ function formatYearMonth(date) {
   const d = new Date(date);
   return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}`;
 }
+
+// Map the project filenames (IDs) to their respective icons
+const iconMap = {
+  'thesis': iconCr,
+  'unicycle_bot': iconDatboi,
+  'emg_viz': iconEmg
+};
 ---
 
 <BaseLayout title="Projects">
@@ -23,18 +36,31 @@ function formatYearMonth(date) {
     </header>
 
     <div class="grid gap-8">
-      {sortedProjects.map((project, index) => (
+      {sortedProjects.map((project) => (
         <a href={`/projects/${project.id}`} class="group p-8 bg-white border border-slate-200 rounded-2xl hover:border-blue-500 hover:shadow-sm transition-all flex flex-col">
           
-          <div class="flex justify-between items-start mb-4 gap-4">
-            <time class="text-xs font-mono text-blue-600 block tracking-widest pt-1">{formatYearMonth(project.data.date)}</time>
+          <div class="flex justify-between items-start gap-6 mb-4">
             
-            <span class="text-4xl font-black text-slate-200 italic tracking-tighter group-hover:text-blue-200 transition-colors flex-shrink-0 leading-none">
-              #{String(index + 1).padStart(2, '0')}
-            </span>
+            <!-- Group the date and title on the left -->
+            <div class="flex flex-col">
+              <time class="text-xs font-mono text-blue-600 block tracking-widest mb-3">{formatYearMonth(project.data.date)}</time>
+              <h2 class="text-3xl font-bold text-slate-900 tracking-tight group-hover:translate-x-2 transition-transform">{project.data.title}</h2>
+            </div>
+            
+            <!-- Icon rendering block pushed to the right, increased in size -->
+            {iconMap[project.id] ? (
+              <Image 
+                src={iconMap[project.id]} 
+                alt={`${project.data.title} icon`}
+                class="w-24 h-24 sm:w-28 sm:h-28 object-cover rounded-xl border-2 border-slate-100 shadow-sm transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 group-hover:border-blue-200 flex-shrink-0"
+              />
+            ) : (
+              <!-- Fallback placeholder -->
+              <div class="w-24 h-24 sm:w-28 sm:h-28 bg-slate-100 rounded-xl border-2 border-slate-200 flex-shrink-0"></div>
+            )}
+            
           </div>
           
-          <h2 class="text-3xl font-bold text-slate-900 mb-4 tracking-tight group-hover:translate-x-2 transition-transform">{project.data.title}</h2>
           <p class="text-slate-600 max-w-2xl mb-6">{project.data.description}</p>
           
           <div class="flex gap-2 flex-wrap">

@@ -4,16 +4,26 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <BaseLayout title="Home">
   <main class="max-w-5xl mx-auto px-6 py-20">
-    <section class="mb-24">
+    <section class="mb-12">
       <h2 class="text-xs font-bold text-blue-600 uppercase tracking-[0.2em] mb-4">Status: Welcome</h2>
       <h1 class="text-6xl font-black text-slate-900 mb-8 tracking-tighter italic">
         HEY!
       </h1>
-      <div class="prose-engineering text-lg text-slate-600 leading-relaxed">
+      <div class="prose-engineering text-lg text-slate-600 leading-relaxed [&>p:last-child]:mb-0">
         <p>
-          I'm Adrian. I'm a recent robotics engineering graduate ...
+          I'm Adrian. I'm a recent robotics engineering graduate and someone who is striving to become an engineer of clever products that make lives 
+          better. Multi-disciplinary engineering and specifically robotic/mechatronic systems are my passion. I enjoy working on projects 
+          that blend creativity and uniqueness with technical competence, and challenge me to confront difficult problems. Sometimes I succeed, 
+          sometimes I fail, but I always find that I'm happier by the end and do it all over again. This website curates some of my favourite projects 
+          that I've worked on or that I'm currently working on, along with some of the things I've learned along the way.
         </p>
-
+        
+        <p class="mt-8 p-6 bg-blue-50 border-l-4 border-blue-600 rounded-r-xl text-slate-800 shadow-sm text-base">
+          I'm currently looking for entry-level roles along the lines of robotics/mechatronics systems design, systems integration, or R&D. Through my
+          projects, schooling, and past internships, I've gained mechatronics/robotics experience in a variety of areas, ranging from medical robotics 
+          to industrial automation in automotive manufacturing. If you happen to like what you see here and think I might be a good fit for your team, 
+          please don't hesitate to download my resume below and reach out!
+        </p>
       </div>
     </section>
 
@@ -23,9 +33,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="p-6 bg-white border border-slate-200 rounded-xl">
           <h3 class="text-xs font-black text-cyan-600 uppercase tracking-widest mb-4">Software</h3>
-          <ul class="font-mono text-[11px] text-slate-500 space-y-1">
+          <ul class="font-mono text-[11px] text-slate-700 space-y-1">
             <li>Python (NumPy, OpenCV, PyTorch)</li>
-            <li>C // C++</li>
+            <li>C (Embedded Focus)</li>
             <li>ROS 2</li>
             <li>MATLAB // Simulink</li>
             <li>Linux</li>
@@ -35,9 +45,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         
         <div class="p-6 bg-white border border-slate-200 rounded-xl">
           <h3 class="text-xs font-black text-cyan-600 uppercase tracking-widest mb-4">Electrical / Embedded</h3>
-          <ul class="font-mono text-[11px] text-slate-500 space-y-1">
+          <ul class="font-mono text-[11px] text-slate-700 space-y-1">
             <li>Embedded Linux (Nvidia Jetson, RPI)</li>
             <li>Microcontrollers (ESP32, STM32, Arduino)</li>
+            <li>I2C, SPI, Ethernet, CAN/CAN-FD</li>
             <li>PCB Design (KiCAD, EaglePCB)</li>
             <li>Oscilloscopes // Function Generators</li>
             <li>Soldering & Wire Harnessing</li>
@@ -46,7 +57,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         
         <div class="p-6 bg-white border border-slate-200 rounded-xl">
           <h3 class="text-xs font-black text-cyan-600 uppercase tracking-widest mb-4">Mechanical</h3>
-          <ul class="font-mono text-[11px] text-slate-500 space-y-1">
+          <ul class="font-mono text-[11px] text-slate-700 space-y-1">
             <li>SOLIDWORKS // Fusion360 // AutoCAD</li>
             <li>3D Printing (FDM/SLA)</li>
             <li>Laser Cutting</li>
@@ -62,7 +73,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <p class="text-slate-400 font-mono text-sm">Size: 1.2MB | Format: PDF</p>
       </div>
       <a 
-        href="/resume.pdf" 
+        href="/Resume_Adrian_Shkumbov.pdf" 
         download 
         class="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition-all transform hover:scale-105 flex items-center gap-2"
       >
@@ -73,7 +84,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       </a>
     </section>
 
-    <section class="mb-24 flex justify-center">
+    <section class="mb-4 flex justify-center">
       <a 
         href="/projects" 
         class="group relative inline-flex items-center justify-center px-10 py-5 font-black text-white transition-all duration-200 bg-amber-500 font-mono text-lg uppercase tracking-widest rounded-2xl hover:bg-amber-400 hover:scale-105 hover:shadow-[0_0_40px_-10px_rgba(245,158,11,0.5)] active:scale-95"
